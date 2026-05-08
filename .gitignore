@@ -12,3 +12,4 @@ starfall.sqlite
 playwright-report
 test-results
 tmp
+output

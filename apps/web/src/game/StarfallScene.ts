@@ -53,6 +53,10 @@ export class StarfallScene extends Phaser.Scene {
     this.room = room;
   }
 
+  preload(): void {
+    this.load.image("academy-panorama", "/assets/starfall-academy-panorama.png");
+  }
+
   create(): void {
     ensureGameTextures(this);
     this.cameras.main.setBounds(0, 0, WORLD_WIDTH * TILE_SIZE, WORLD_HEIGHT * TILE_SIZE);
@@ -94,25 +98,45 @@ export class StarfallScene extends Phaser.Scene {
   }
 
   private drawBackground(): void {
-    this.add.rectangle(0, 0, WORLD_WIDTH * TILE_SIZE, WORLD_HEIGHT * TILE_SIZE, 0x111b36).setOrigin(0).setDepth(-40);
+    const worldWidth = WORLD_WIDTH * TILE_SIZE;
+    const worldHeight = WORLD_HEIGHT * TILE_SIZE;
+
+    this.add.rectangle(0, 0, worldWidth, worldHeight, 0x111b36).setOrigin(0).setDepth(-50);
+    if (this.textures.exists("academy-panorama")) {
+      this.add
+        .image(worldWidth / 2, worldHeight / 2, "academy-panorama")
+        .setDisplaySize(worldWidth, worldHeight)
+        .setAlpha(0.62)
+        .setDepth(-49);
+      this.add.rectangle(0, 0, worldWidth, worldHeight, 0x10182e, 0.32).setOrigin(0).setDepth(-48);
+    }
+
     const stars = this.add.graphics().setDepth(-35);
-    for (let i = 0; i < 220; i += 1) {
-      const x = (i * 137) % (WORLD_WIDTH * TILE_SIZE);
+    for (let i = 0; i < 260; i += 1) {
+      const x = (i * 137) % worldWidth;
       const y = ((i * 67) % 480) + 28;
       const alpha = 0.35 + ((i * 17) % 50) / 100;
       stars.fillStyle(i % 8 === 0 ? 0xffe082 : 0xd6f4ff, alpha);
       stars.fillRect(x, y, i % 5 === 0 ? 2 : 1, i % 5 === 0 ? 2 : 1);
     }
+    for (let i = 0; i < 9; i += 1) {
+      const x = (i * 307 + 90) % worldWidth;
+      const y = 70 + ((i * 43) % 250);
+      stars.fillStyle(0xffc766, 0.42);
+      stars.fillRect(x, y, 32, 2);
+      stars.fillStyle(0xe8fbff, 0.25);
+      stars.fillRect(x + 9, y - 2, 70, 1);
+    }
 
     const far = this.add.graphics().setDepth(-30);
     far.fillStyle(0x263253, 0.85);
-    for (let x = -80; x < WORLD_WIDTH * TILE_SIZE + 120; x += 160) {
+    for (let x = -80; x < worldWidth + 120; x += 160) {
       far.fillTriangle(x, 760, x + 90, 510 + ((x / 160) % 3) * 28, x + 190, 760);
     }
 
     const ruins = this.add.graphics().setDepth(-20);
     ruins.fillStyle(0x3d425e, 0.85);
-    for (let x = 180; x < WORLD_WIDTH * TILE_SIZE; x += 420) {
+    for (let x = 180; x < worldWidth; x += 420) {
       ruins.fillRect(x, 595, 54, 130);
       ruins.fillRect(x - 18, 575, 92, 20);
       ruins.fillStyle(0xffc857, 0.25);
@@ -123,10 +147,20 @@ export class StarfallScene extends Phaser.Scene {
 
   private createAcademyHub(): void {
     const graphics = this.add.graphics().setDepth(-12);
+    const hubX = 20 * TILE_SIZE;
+    const hubY = 17 * TILE_SIZE;
+    const hubWidth = 75 * TILE_SIZE;
+    const hubHeight = 12 * TILE_SIZE;
+
+    graphics.fillStyle(0x11182b, 0.7);
+    graphics.fillRect(hubX - 28, hubY + hubHeight - 10, hubWidth + 56, 34);
     graphics.fillStyle(0x1b2748, 0.92);
-    graphics.fillRect(20 * TILE_SIZE, 17 * TILE_SIZE, 75 * TILE_SIZE, 12 * TILE_SIZE);
+    graphics.fillRect(hubX, hubY, hubWidth, hubHeight);
+    graphics.fillStyle(0x27375d, 0.7);
+    graphics.fillTriangle(hubX + 16, hubY, hubX + 280, hubY - 72, hubX + 544, hubY);
+    graphics.fillTriangle(hubX + 700, hubY, hubX + 950, hubY - 54, hubX + 1200, hubY);
     graphics.lineStyle(3, 0x6f86b8, 0.85);
-    graphics.strokeRect(20 * TILE_SIZE, 17 * TILE_SIZE, 75 * TILE_SIZE, 12 * TILE_SIZE);
+    graphics.strokeRect(hubX, hubY, hubWidth, hubHeight);
 
     graphics.fillStyle(0x151e38, 0.9);
     graphics.fillRect(53 * TILE_SIZE, 8 * TILE_SIZE, 10 * TILE_SIZE, 9 * TILE_SIZE);
@@ -150,6 +184,7 @@ export class StarfallScene extends Phaser.Scene {
         graphics.fillStyle(0xffd66b, 0.35);
         graphics.fillRect(x + column * TILE_SIZE + 6, y + 18, 12, 24);
       }
+      drawAcademyRoomDetails(graphics, room.id, x, y, width, height);
 
       const label = this.add
         .text(x + width / 2, y + 9, room.shortLabel, {
@@ -190,6 +225,10 @@ export class StarfallScene extends Phaser.Scene {
         const body = this.add.graphics();
         if (isThaddeus) {
           drawThaddeusSprite(body);
+        } else if (npc.id === "mira") {
+          drawMiraSprite(body);
+        } else if (npc.id === "orin") {
+          drawOrinSprite(body);
         } else {
           drawDefaultNpcSprite(body, Phaser.Display.Color.HexStringToColor(npc.color).color);
         }
@@ -432,6 +471,158 @@ function drawDefaultNpcSprite(graphics: Phaser.GameObjects.Graphics, bodyColor: 
   graphics.fillRect(12, 7, 2, 2);
   graphics.fillStyle(0xffd66b, 1);
   graphics.fillRect(3, 27, 14, 4);
+}
+
+function drawAcademyRoomDetails(
+  graphics: Phaser.GameObjects.Graphics,
+  roomId: string,
+  x: number,
+  y: number,
+  width: number,
+  height: number
+): void {
+  graphics.fillStyle(0x0f172b, 0.32);
+  graphics.fillRect(x + 8, y + height - 18, width - 16, 10);
+
+  for (let column = 18; column < width - 8; column += 54) {
+    graphics.fillStyle(0x0c1223, 0.62);
+    graphics.fillRect(x + column, y + height - 52, 20, 36);
+    graphics.fillStyle(0xffd66b, 0.42);
+    graphics.fillRect(x + column + 4, y + height - 47, 12, 18);
+  }
+
+  if (roomId === "gardens") {
+    for (let planter = 18; planter < width - 18; planter += 48) {
+      graphics.fillStyle(0x5a3b32, 1);
+      graphics.fillRect(x + planter, y + height - 27, 31, 7);
+      graphics.fillStyle(0x5dbb74, 1);
+      graphics.fillRect(x + planter + 4, y + height - 36, 5, 10);
+      graphics.fillRect(x + planter + 13, y + height - 40, 6, 14);
+      graphics.fillRect(x + planter + 23, y + height - 34, 4, 8);
+      graphics.fillStyle(0x9ff7ff, 0.72);
+      graphics.fillRect(x + planter + 16, y + height - 44, 2, 2);
+    }
+    return;
+  }
+
+  if (roomId === "dorms") {
+    for (let bunk = 18; bunk < width - 28; bunk += 54) {
+      graphics.fillStyle(0x714836, 1);
+      graphics.fillRect(x + bunk, y + height - 47, 34, 9);
+      graphics.fillRect(x + bunk, y + height - 31, 34, 9);
+      graphics.fillStyle(0x87a8cf, 1);
+      graphics.fillRect(x + bunk + 4, y + height - 44, 20, 4);
+      graphics.fillRect(x + bunk + 4, y + height - 28, 20, 4);
+      graphics.fillStyle(0xffd66b, 0.62);
+      graphics.fillRect(x + bunk + 29, y + height - 48, 3, 8);
+    }
+    return;
+  }
+
+  if (roomId === "plaza") {
+    graphics.fillStyle(0xffd66b, 0.28);
+    graphics.fillCircle(x + width / 2, y + height - 44, 28);
+    graphics.fillStyle(0x3b4f78, 1);
+    graphics.fillRect(x + width / 2 - 34, y + height - 42, 68, 6);
+    graphics.fillStyle(0xffd66b, 1);
+    graphics.fillRect(x + width / 2 - 4, y + height - 66, 8, 30);
+    graphics.fillRect(x + width / 2 - 15, y + height - 70, 30, 6);
+    return;
+  }
+
+  if (roomId === "classrooms") {
+    graphics.fillStyle(0x18342f, 1);
+    graphics.fillRect(x + 18, y + height - 66, 64, 32);
+    graphics.fillStyle(0xa9bfd8, 1);
+    graphics.fillRect(x + 26, y + height - 57, 32, 2);
+    graphics.fillRect(x + 26, y + height - 49, 42, 2);
+    graphics.fillStyle(0xffd66b, 0.42);
+    graphics.fillRect(x + width - 44, y + height - 62, 18, 36);
+    return;
+  }
+
+  if (roomId === "crafting-hall") {
+    graphics.fillStyle(0x7b4f35, 1);
+    graphics.fillRect(x + 22, y + height - 39, width - 44, 8);
+    graphics.fillStyle(0x9ff7ff, 0.78);
+    for (let spark = 0; spark < 4; spark += 1) {
+      graphics.fillRect(x + 38 + spark * 36, y + height - 52 - (spark % 2) * 8, 2, 2);
+    }
+    graphics.fillStyle(0xffb35f, 1);
+    graphics.fillRect(x + width - 44, y + height - 49, 24, 18);
+    return;
+  }
+
+  if (roomId === "observatory") {
+    graphics.fillStyle(0x2a365b, 1);
+    graphics.fillRect(x + width / 2 - 4, y + height - 74, 8, 50);
+    graphics.fillStyle(0xcfa04e, 1);
+    graphics.fillRect(x + width / 2 - 32, y + height - 68, 58, 8);
+    graphics.fillStyle(0x9ff7ff, 1);
+    graphics.fillRect(x + width / 2 + 22, y + height - 70, 9, 10);
+  }
+}
+
+function drawMiraSprite(graphics: Phaser.GameObjects.Graphics): void {
+  const outline = 0x11182b;
+  graphics.fillStyle(outline, 1);
+  graphics.fillRect(3, 10, 16, 18);
+  graphics.fillRect(5, 4, 12, 10);
+  graphics.fillRect(2, 16, 4, 10);
+  graphics.fillRect(16, 16, 4, 10);
+  graphics.fillRect(6, 26, 4, 5);
+  graphics.fillRect(12, 26, 4, 5);
+
+  graphics.fillStyle(0x75d68f, 1);
+  graphics.fillRect(5, 13, 12, 14);
+  graphics.fillStyle(0x385b42, 1);
+  graphics.fillRect(5, 18, 12, 3);
+  graphics.fillRect(3, 17, 3, 8);
+  graphics.fillRect(16, 17, 3, 8);
+  graphics.fillStyle(0xd99056, 1);
+  graphics.fillRect(6, 6, 10, 7);
+  graphics.fillStyle(0xb94f37, 1);
+  graphics.fillRect(4, 4, 14, 5);
+  graphics.fillRect(4, 8, 3, 8);
+  graphics.fillRect(15, 8, 3, 8);
+  graphics.fillStyle(0x11182b, 1);
+  graphics.fillRect(7, 9, 2, 2);
+  graphics.fillRect(13, 9, 2, 2);
+  graphics.fillStyle(0xffd66b, 1);
+  graphics.fillRect(9, 20, 5, 2);
+  graphics.fillStyle(0x9ff7ff, 1);
+  graphics.fillRect(17, 15, 2, 2);
+}
+
+function drawOrinSprite(graphics: Phaser.GameObjects.Graphics): void {
+  const outline = 0x11182b;
+  graphics.fillStyle(outline, 1);
+  graphics.fillRect(3, 10, 16, 18);
+  graphics.fillRect(5, 4, 12, 10);
+  graphics.fillRect(2, 15, 4, 11);
+  graphics.fillRect(16, 15, 4, 11);
+  graphics.fillRect(6, 26, 4, 5);
+  graphics.fillRect(12, 26, 4, 5);
+
+  graphics.fillStyle(0x6f7da9, 1);
+  graphics.fillRect(5, 13, 12, 14);
+  graphics.fillStyle(0x423344, 1);
+  graphics.fillRect(4, 17, 14, 5);
+  graphics.fillRect(3, 15, 3, 10);
+  graphics.fillRect(16, 15, 3, 10);
+  graphics.fillStyle(0xc59267, 1);
+  graphics.fillRect(7, 7, 9, 6);
+  graphics.fillStyle(0x3a2b30, 1);
+  graphics.fillRect(4, 4, 14, 5);
+  graphics.fillRect(6, 2, 10, 4);
+  graphics.fillStyle(0x9ff7ff, 1);
+  graphics.fillRect(13, 3, 3, 3);
+  graphics.fillStyle(0x11182b, 1);
+  graphics.fillRect(8, 9, 2, 2);
+  graphics.fillRect(14, 9, 2, 2);
+  graphics.fillRect(9, 14, 5, 1);
+  graphics.fillStyle(0xffd66b, 1);
+  graphics.fillRect(5, 22, 2, 2);
 }
 
 function drawThaddeusSprite(graphics: Phaser.GameObjects.Graphics): void {

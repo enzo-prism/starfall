@@ -385,6 +385,7 @@ export function App() {
               }
             }}
           >
+            <i className={`item-swatch item-swatch-${itemId}`} aria-hidden="true" />
             <span>{ITEM_DEFINITIONS[itemId]?.label ?? itemId}</span>
             <strong>{count}</strong>
           </button>
@@ -406,6 +407,7 @@ export function App() {
       <div className="mobile-craft-list">
         {Object.entries(RECIPES).map(([itemId, recipe]) => (
           <button key={itemId} type="button" disabled={!canCraft[itemId]} onClick={() => craft(itemId)}>
+            <i className={`item-swatch item-swatch-${itemId}`} aria-hidden="true" />
             <span>{recipe.label}</span>
             <small>
               {Object.entries(recipe.inputs)
@@ -530,6 +532,7 @@ export function App() {
           <div className="craft-list">
             {Object.entries(RECIPES).map(([itemId, recipe]) => (
               <button key={itemId} type="button" disabled={!canCraft[itemId]} onClick={() => craft(itemId)}>
+                <i className={`item-swatch item-swatch-${itemId}`} aria-hidden="true" />
                 <span>{recipe.label}</span>
                 <small>
                   {Object.entries(recipe.inputs)
