@@ -960,7 +960,7 @@ button {
 
   .mobile-sheet {
     bottom: calc(116px + env(safe-area-inset-bottom));
-    max-height: min(38vh, 180px);
+    max-height: min(48vh, 190px);
   }
 
   .mobile-sheet-body {
@@ -968,8 +968,39 @@ button {
     padding: 7px;
   }
 
+  .mobile-sheet-academy .mobile-sheet-body {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.85fr) minmax(118px, 0.65fr);
+    align-items: start;
+  }
+
+  .mobile-sheet-academy .room-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .mobile-sheet-academy .room-grid button,
+  .mobile-sheet-academy .npc-list button {
+    min-height: 32px;
+    padding: 4px 6px;
+  }
+
+  .mobile-sheet-academy .npc-card {
+    display: grid;
+    min-height: 100%;
+    margin: 0;
+    align-content: center;
+  }
+
+  .mobile-sheet-academy .npc-card span,
+  .mobile-sheet-academy .npc-card small {
+    display: none;
+  }
+
+  .mobile-sheet-academy .npc-card button {
+    min-height: 34px;
+  }
+
   .mobile-sheet .academy-card,
-  .mobile-sheet .npc-card {
+  .mobile-sheet:not(.mobile-sheet-academy) .npc-card {
     display: none;
   }
 
