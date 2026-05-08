@@ -630,25 +630,25 @@ button {
   }
 
   .academy-panel .panel-title {
-    margin-bottom: 6px;
+    display: none;
   }
 
   .room-grid,
   .academy-panel .npc-list {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 6px;
-    overflow-x: auto;
-    padding-bottom: 1px;
+    overflow: visible;
   }
 
   .room-grid button,
   .academy-panel .npc-list button {
-    flex: 0 0 108px;
-    min-height: 30px;
+    min-width: 0;
+    min-height: 28px;
     display: grid;
     place-items: center;
     text-align: center;
-    white-space: nowrap;
+    white-space: normal;
   }
 
   .academy-panel .npc-list {
