@@ -14,9 +14,9 @@ Vercel serves the browser game only. The realtime server runs on Railway because
 
 ### Production URLs
 
-- Play URL: pending deployment
-- Realtime server: pending deployment
-- Source: pending deployment
+- Play URL: `https://starfall-six.vercel.app`
+- Realtime server: `https://starfall-server-production.up.railway.app`
+- Source: `https://github.com/enzo-prism/starfall`
 
 ### Production Environment
 
@@ -32,6 +32,12 @@ Vercel web variable:
 
 ```bash
 VITE_STARFALL_SERVER_URL=https://your-railway-service-url
+```
+
+Current production value:
+
+```bash
+VITE_STARFALL_SERVER_URL=https://starfall-server-production.up.railway.app
 ```
 
 ## Run Locally
