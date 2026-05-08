@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type PointerEvent, type ReactNode } from "react";
 import { Client, type Room } from "@colyseus/sdk";
 import {
   ACADEMY_NPCS,
@@ -21,6 +21,14 @@ import { avatarOptions } from "./game/avatar-options";
 const SERVER_URL = import.meta.env.VITE_STARFALL_SERVER_URL ?? "http://localhost:2567";
 
 type ToolAction = "mine" | "place";
+type MobilePanel = "path" | "academy" | "chat" | "pack" | null;
+
+const MOBILE_PANEL_LABELS: Record<Exclude<MobilePanel, null>, string> = {
+  path: "Path",
+  academy: "Academy",
+  chat: "Chat",
+  pack: "Pack"
+};
 
 interface PlayerSnapshot {
   sessionId: string;
@@ -69,6 +77,7 @@ export function App() {
   const [chatDraft, setChatDraft] = useState("");
   const [muted, setMuted] = useState<Set<string>>(new Set());
   const [mobileInput, setMobileInput] = useState({ left: false, right: false, jump: false });
+  const [mobilePanel, setMobilePanel] = useState<MobilePanel>(null);
   const [selectedNpcId, setSelectedNpcId] = useState("thaddeus");
   const [selectedRoomId, setSelectedRoomId] = useState("plaza");
 
@@ -83,6 +92,20 @@ export function App() {
   useEffect(() => {
     window.dispatchEvent(new CustomEvent("starfall:mobile-input", { detail: mobileInput }));
   }, [mobileInput]);
+
+  useEffect(() => {
+    const releaseMobileInput = () => {
+      setMobileInput({ left: false, right: false, jump: false });
+    };
+    window.addEventListener("pointerup", releaseMobileInput);
+    window.addEventListener("pointercancel", releaseMobileInput);
+    window.addEventListener("blur", releaseMobileInput);
+    return () => {
+      window.removeEventListener("pointerup", releaseMobileInput);
+      window.removeEventListener("pointercancel", releaseMobileInput);
+      window.removeEventListener("blur", releaseMobileInput);
+    };
+  }, []);
 
   useEffect(() => {
     if (!room) {
@@ -216,6 +239,197 @@ export function App() {
     });
   }
 
+  function toggleMobilePanel(panel: Exclude<MobilePanel, null>) {
+    setMobilePanel((current) => (current === panel ? null : panel));
+  }
+
+  function pressMobileControl(control: keyof typeof mobileInput, isActive: boolean) {
+    setMobileInput((current) => ({ ...current, [control]: isActive }));
+  }
+
+  function capturePointer(event: PointerEvent<HTMLButtonElement>) {
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  }
+
+  const skillGrid = (
+    <div className="skill-grid">
+      {(["mining", "crafting", "exploration"] as const).map((skill) => (
+        <div key={skill}>
+          <span>{skill}</span>
+          <strong>Lv {snapshot.skillsLevel[skill] ?? 1}</strong>
+          <small>{snapshot.skillsXp[skill] ?? 0} xp</small>
+        </div>
+      ))}
+    </div>
+  );
+
+  const taskList = (
+    <div className="task-list">
+      {TASKS.map((task) => {
+        const progress = Math.min(task.target, snapshot.taskProgress[task.id] ?? 0);
+        const done = snapshot.completedTasks[task.id] === true;
+        return (
+          <div key={task.id} className={done ? "task done" : "task"}>
+            <span>{task.label}</span>
+            <small>
+              {Math.floor(progress)} / {task.target}
+            </small>
+          </div>
+        );
+      })}
+    </div>
+  );
+
+  const academyControls = (
+    <>
+      <div className="room-grid">
+        {ACADEMY_ROOMS.map((academyRoom) => (
+          <button
+            key={academyRoom.id}
+            type="button"
+            className={selectedRoom?.id === academyRoom.id ? "selected" : ""}
+            onClick={() => visitRoom(academyRoom.id)}
+          >
+            {academyRoom.shortLabel}
+          </button>
+        ))}
+      </div>
+      {selectedRoom && (
+        <div className="academy-card">
+          <strong>{selectedRoom.label}</strong>
+          <span>{selectedRoom.description}</span>
+          <small>Hosts: {selectedRoomNpcs.map((npc) => npc.name).join(", ")}</small>
+          {selectedActivity && (
+            <button type="button" onClick={() => startActivity(selectedActivity.id)}>
+              {selectedActivity.label}
+            </button>
+          )}
+        </div>
+      )}
+      <div className="npc-list">
+        {ACADEMY_NPCS.map((npc) => (
+          <button
+            key={npc.id}
+            type="button"
+            className={selectedNpc?.id === npc.id ? "selected" : ""}
+            onClick={() => setSelectedNpcId(npc.id)}
+          >
+            <span>{npc.name}</span>
+            <small>{npc.role}</small>
+          </button>
+        ))}
+      </div>
+      {selectedNpc && (
+        <div className="npc-card">
+          <strong>{selectedNpc.name}</strong>
+          <span>{selectedNpc.dialogue[0] ?? selectedNpc.greeting}</span>
+          <small>{selectedNpc.truth}</small>
+          <button type="button" onClick={() => talkNpc(selectedNpc.id)}>
+            Talk
+          </button>
+        </div>
+      )}
+    </>
+  );
+
+  const chatControls = (
+    <>
+      <div className="chat-log" aria-live="polite">
+        {visibleChats.slice(-7).map((event) => (
+          <div key={event.id}>
+            <strong>{event.displayName}</strong>
+            <span>{event.text}</span>
+          </div>
+        ))}
+      </div>
+      <form
+        className="chat-form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          sendChat();
+        }}
+      >
+        <input value={chatDraft} maxLength={96} onChange={(event) => setChatDraft(event.target.value)} />
+        <button type="submit">Send</button>
+      </form>
+      <div className="quick-chat">
+        {getQuickChatOptions().slice(0, 4).map((text) => (
+          <button key={text} type="button" onClick={() => sendChat(text)}>
+            {text}
+          </button>
+        ))}
+      </div>
+    </>
+  );
+
+  const toolInventoryControls = (
+    <>
+      <div className="tool-toggle">
+        <button className={toolAction === "mine" ? "selected" : ""} type="button" onClick={() => setToolAction("mine")}>
+          Pick
+        </button>
+        <button className={toolAction === "place" ? "selected" : ""} type="button" onClick={() => setToolAction("place")}>
+          Place
+        </button>
+      </div>
+      <div className="inventory-bar">
+        {inventoryItems.map(([itemId, count]) => (
+          <button
+            key={itemId}
+            type="button"
+            className={selectedItem === itemId ? "selected" : ""}
+            onClick={() => {
+              setSelectedItem(itemId as ItemId);
+              if (ITEM_DEFINITIONS[itemId]?.placeTile) {
+                setToolAction("place");
+              }
+            }}
+          >
+            <span>{ITEM_DEFINITIONS[itemId]?.label ?? itemId}</span>
+            <strong>{count}</strong>
+          </button>
+        ))}
+      </div>
+      <div className="emotes mobile-emotes">
+        {["wave", "sparkle", "cheer", "sit"].map((emote) => (
+          <button key={emote} type="button" onClick={() => sendEmote(emote)}>
+            {emote}
+          </button>
+        ))}
+      </div>
+    </>
+  );
+
+  const packControls = (
+    <>
+      {toolInventoryControls}
+      <div className="mobile-craft-list">
+        {Object.entries(RECIPES).map(([itemId, recipe]) => (
+          <button key={itemId} type="button" disabled={!canCraft[itemId]} onClick={() => craft(itemId)}>
+            <span>{recipe.label}</span>
+            <small>
+              {Object.entries(recipe.inputs)
+                .map(([input, count]) => `${ITEM_DEFINITIONS[input]?.label ?? input} x${count}`)
+                .join(" + ")}
+            </small>
+          </button>
+        ))}
+      </div>
+    </>
+  );
+
+  const mobilePanelContent = {
+    path: (
+      <>
+        {skillGrid}
+        {taskList}
+      </>
+    ),
+    academy: academyControls,
+    chat: chatControls,
+    pack: packControls
+  } satisfies Record<Exclude<MobilePanel, null>, ReactNode>;
+
   if (!room) {
     return (
       <main className="login-screen">
@@ -265,7 +479,7 @@ export function App() {
     <main className="app-shell">
       <GameCanvas room={room} />
 
-      <header className="top-hud">
+      <header className="top-hud desktop-hud">
         <div>
           <strong>Starfall</strong>
           <span>{WORLD_NAME}</span>
@@ -273,40 +487,27 @@ export function App() {
         <div className="status-pill">{status}</div>
       </header>
 
-      <aside className="left-hud">
+      <header className="mobile-top-bar">
+        <div>
+          <strong>{ownPlayer?.displayName ?? "Traveler"}</strong>
+          <span>{WORLD_NAME}</span>
+        </div>
+        <small>{status}</small>
+      </header>
+
+      <aside className="left-hud desktop-hud">
         <section className="hud-panel player-panel">
           <div className="panel-title">{ownPlayer?.displayName ?? "Traveler"}</div>
-          <div className="skill-grid">
-            {(["mining", "crafting", "exploration"] as const).map((skill) => (
-              <div key={skill}>
-                <span>{skill}</span>
-                <strong>Lv {snapshot.skillsLevel[skill] ?? 1}</strong>
-                <small>{snapshot.skillsXp[skill] ?? 0} xp</small>
-              </div>
-            ))}
-          </div>
+          {skillGrid}
         </section>
 
         <section className="hud-panel">
           <div className="panel-title">Path</div>
-          <div className="task-list">
-            {TASKS.map((task) => {
-              const progress = Math.min(task.target, snapshot.taskProgress[task.id] ?? 0);
-              const done = snapshot.completedTasks[task.id] === true;
-              return (
-                <div key={task.id} className={done ? "task done" : "task"}>
-                  <span>{task.label}</span>
-                  <small>
-                    {Math.floor(progress)} / {task.target}
-                  </small>
-                </div>
-              );
-            })}
-          </div>
+          {taskList}
         </section>
       </aside>
 
-      <aside className="right-hud">
+      <aside className="right-hud desktop-hud">
         <section className="hud-panel">
           <div className="panel-title">Online</div>
           <div className="player-list">
@@ -321,53 +522,7 @@ export function App() {
 
         <section className="hud-panel academy-panel">
           <div className="panel-title">Academy</div>
-          <div className="room-grid">
-            {ACADEMY_ROOMS.map((academyRoom) => (
-              <button
-                key={academyRoom.id}
-                type="button"
-                className={selectedRoom?.id === academyRoom.id ? "selected" : ""}
-                onClick={() => visitRoom(academyRoom.id)}
-              >
-                {academyRoom.shortLabel}
-              </button>
-            ))}
-          </div>
-          {selectedRoom && (
-            <div className="academy-card">
-              <strong>{selectedRoom.label}</strong>
-              <span>{selectedRoom.description}</span>
-              <small>Hosts: {selectedRoomNpcs.map((npc) => npc.name).join(", ")}</small>
-              {selectedActivity && (
-                <button type="button" onClick={() => startActivity(selectedActivity.id)}>
-                  {selectedActivity.label}
-                </button>
-              )}
-            </div>
-          )}
-          <div className="npc-list">
-            {ACADEMY_NPCS.map((npc) => (
-              <button
-                key={npc.id}
-                type="button"
-                className={selectedNpc?.id === npc.id ? "selected" : ""}
-                onClick={() => setSelectedNpcId(npc.id)}
-              >
-                <span>{npc.name}</span>
-                <small>{npc.role}</small>
-              </button>
-            ))}
-          </div>
-          {selectedNpc && (
-            <div className="npc-card">
-              <strong>{selectedNpc.name}</strong>
-              <span>{selectedNpc.dialogue[0] ?? selectedNpc.greeting}</span>
-              <small>{selectedNpc.truth}</small>
-              <button type="button" onClick={() => talkNpc(selectedNpc.id)}>
-                Talk
-              </button>
-            </div>
-          )}
+          {academyControls}
         </section>
 
         <section className="hud-panel">
@@ -387,95 +542,83 @@ export function App() {
         </section>
       </aside>
 
-      <section className="chat-panel hud-panel">
-        <div className="chat-log" aria-live="polite">
-          {visibleChats.slice(-7).map((event) => (
-            <div key={event.id}>
-              <strong>{event.displayName}</strong>
-              <span>{event.text}</span>
-            </div>
-          ))}
-        </div>
-        <form
-          className="chat-form"
-          onSubmit={(event) => {
-            event.preventDefault();
-            sendChat();
-          }}
-        >
-          <input value={chatDraft} maxLength={96} onChange={(event) => setChatDraft(event.target.value)} />
-          <button type="submit">Send</button>
-        </form>
-        <div className="quick-chat">
-          {getQuickChatOptions().slice(0, 4).map((text) => (
-            <button key={text} type="button" onClick={() => sendChat(text)}>
-              {text}
-            </button>
-          ))}
-        </div>
+      <section className="chat-panel hud-panel desktop-hud">
+        {chatControls}
       </section>
 
-      <nav className="bottom-hud" aria-label="Tools and inventory">
-        <div className="tool-toggle">
-          <button className={toolAction === "mine" ? "selected" : ""} type="button" onClick={() => setToolAction("mine")}>
-            Pick
-          </button>
-          <button className={toolAction === "place" ? "selected" : ""} type="button" onClick={() => setToolAction("place")}>
-            Place
-          </button>
-        </div>
-        <div className="inventory-bar">
-          {inventoryItems.map(([itemId, count]) => (
-            <button
-              key={itemId}
-              type="button"
-              className={selectedItem === itemId ? "selected" : ""}
-              onClick={() => {
-                setSelectedItem(itemId as ItemId);
-                if (ITEM_DEFINITIONS[itemId]?.placeTile) {
-                  setToolAction("place");
-                }
-              }}
-            >
-              <span>{ITEM_DEFINITIONS[itemId]?.label ?? itemId}</span>
-              <strong>{count}</strong>
-            </button>
-          ))}
-        </div>
-        <div className="emotes">
-          {["wave", "sparkle", "cheer", "sit"].map((emote) => (
-            <button key={emote} type="button" onClick={() => sendEmote(emote)}>
-              {emote}
-            </button>
-          ))}
-        </div>
+      <nav className="bottom-hud desktop-hud" aria-label="Tools and inventory">
+        {toolInventoryControls}
       </nav>
 
+      <nav className="mobile-tab-dock" aria-label="Mobile panels">
+        {(["path", "academy", "chat", "pack"] as const).map((panel) => (
+          <button
+            key={panel}
+            type="button"
+            className={mobilePanel === panel ? "selected" : ""}
+            onClick={() => toggleMobilePanel(panel)}
+          >
+            {MOBILE_PANEL_LABELS[panel]}
+          </button>
+        ))}
+      </nav>
+
+      {mobilePanel && (
+        <section className={`mobile-sheet mobile-sheet-${mobilePanel}`} aria-label={`${mobilePanel} panel`}>
+          <header>
+            <strong>{MOBILE_PANEL_LABELS[mobilePanel]}</strong>
+            <button type="button" onClick={() => setMobilePanel(null)} aria-label="Close mobile panel">
+              Close
+            </button>
+          </header>
+          <div className="mobile-sheet-body">{mobilePanelContent[mobilePanel]}</div>
+        </section>
+      )}
+
       <div className="mobile-controls" aria-label="Mobile controls">
-        <button
-          type="button"
-          onPointerDown={() => setMobileInput((current) => ({ ...current, left: true }))}
-          onPointerUp={() => setMobileInput((current) => ({ ...current, left: false }))}
-          onPointerCancel={() => setMobileInput((current) => ({ ...current, left: false }))}
-        >
-          Left
-        </button>
-        <button
-          type="button"
-          onPointerDown={() => setMobileInput((current) => ({ ...current, right: true }))}
-          onPointerUp={() => setMobileInput((current) => ({ ...current, right: false }))}
-          onPointerCancel={() => setMobileInput((current) => ({ ...current, right: false }))}
-        >
-          Right
-        </button>
-        <button
-          type="button"
-          onPointerDown={() => setMobileInput((current) => ({ ...current, jump: true }))}
-          onPointerUp={() => setMobileInput((current) => ({ ...current, jump: false }))}
-          onPointerCancel={() => setMobileInput((current) => ({ ...current, jump: false }))}
-        >
-          Jump
-        </button>
+        <div className="mobile-control-cluster">
+          <button
+            type="button"
+            aria-pressed={mobileInput.left}
+            onPointerDown={(event) => {
+              capturePointer(event);
+              pressMobileControl("left", true);
+            }}
+            onPointerUp={() => pressMobileControl("left", false)}
+            onPointerCancel={() => pressMobileControl("left", false)}
+            onPointerLeave={() => pressMobileControl("left", false)}
+          >
+            Left
+          </button>
+          <button
+            type="button"
+            aria-pressed={mobileInput.right}
+            onPointerDown={(event) => {
+              capturePointer(event);
+              pressMobileControl("right", true);
+            }}
+            onPointerUp={() => pressMobileControl("right", false)}
+            onPointerCancel={() => pressMobileControl("right", false)}
+            onPointerLeave={() => pressMobileControl("right", false)}
+          >
+            Right
+          </button>
+        </div>
+        <div className="mobile-control-cluster">
+          <button
+            type="button"
+            aria-pressed={mobileInput.jump}
+            onPointerDown={(event) => {
+              capturePointer(event);
+              pressMobileControl("jump", true);
+            }}
+            onPointerUp={() => pressMobileControl("jump", false)}
+            onPointerCancel={() => pressMobileControl("jump", false)}
+            onPointerLeave={() => pressMobileControl("jump", false)}
+          >
+            Jump
+          </button>
+        </div>
       </div>
     </main>
   );

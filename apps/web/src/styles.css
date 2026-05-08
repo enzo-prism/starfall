@@ -520,6 +520,12 @@ button {
   touch-action: none;
 }
 
+.mobile-top-bar,
+.mobile-tab-dock,
+.mobile-sheet {
+  display: none;
+}
+
 @media (max-width: 860px) {
   .right-hud {
     top: auto;
@@ -661,5 +667,314 @@ button {
 
   .quick-chat {
     display: none;
+  }
+}
+
+@media (max-width: 860px) {
+  .desktop-hud {
+    display: none !important;
+  }
+
+  .mobile-top-bar,
+  .mobile-tab-dock,
+  .mobile-sheet,
+  .mobile-controls {
+    position: absolute;
+    z-index: 20;
+  }
+
+  .mobile-top-bar {
+    top: max(10px, env(safe-area-inset-top));
+    left: max(10px, env(safe-area-inset-left));
+    right: max(10px, env(safe-area-inset-right));
+    min-height: 44px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    padding: 7px 10px;
+    border: 2px solid #52688d;
+    border-radius: 8px;
+    background: rgba(17, 24, 43, 0.86);
+    pointer-events: none;
+  }
+
+  .mobile-top-bar div {
+    display: grid;
+    gap: 1px;
+  }
+
+  .mobile-top-bar strong {
+    color: #ffda6a;
+    font-size: 13px;
+    font-weight: 950;
+    text-transform: uppercase;
+  }
+
+  .mobile-top-bar span,
+  .mobile-top-bar small {
+    min-width: 0;
+    overflow: hidden;
+    color: #cfe0f4;
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-tab-dock {
+    left: max(10px, env(safe-area-inset-left));
+    right: max(10px, env(safe-area-inset-right));
+    bottom: calc(8px + env(safe-area-inset-bottom));
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    padding: 6px;
+    border: 2px solid #52688d;
+    border-radius: 8px;
+    background: rgba(17, 24, 43, 0.9);
+    pointer-events: auto;
+  }
+
+  .mobile-tab-dock button,
+  .mobile-sheet button,
+  .mobile-controls button,
+  .mobile-craft-list button {
+    border: 2px solid #60749b;
+    border-radius: 6px;
+    color: #f7fbff;
+    background: #1a2949;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  .mobile-tab-dock button {
+    min-width: 0;
+    min-height: 40px;
+  }
+
+  .mobile-tab-dock button.selected,
+  .mobile-sheet .room-grid button.selected,
+  .mobile-sheet .npc-list button.selected,
+  .mobile-sheet .tool-toggle button.selected,
+  .mobile-sheet .inventory-bar button.selected {
+    color: #11182b;
+    border-color: #fff1a6;
+    background: #ffda6a;
+  }
+
+  .mobile-controls {
+    left: max(10px, env(safe-area-inset-left));
+    right: max(10px, env(safe-area-inset-right));
+    bottom: calc(64px + env(safe-area-inset-bottom));
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    pointer-events: none;
+  }
+
+  .mobile-control-cluster {
+    display: flex;
+    gap: 8px;
+    pointer-events: auto;
+  }
+
+  .mobile-controls button {
+    min-width: 58px;
+    min-height: 56px;
+    padding: 0 12px;
+    background: rgba(26, 41, 73, 0.94);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .mobile-controls button[aria-pressed="true"] {
+    color: #11182b;
+    border-color: #fff1a6;
+    background: #ffda6a;
+  }
+
+  .mobile-sheet {
+    left: max(10px, env(safe-area-inset-left));
+    right: max(10px, env(safe-area-inset-right));
+    bottom: calc(126px + env(safe-area-inset-bottom));
+    max-height: min(42vh, 330px);
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    border: 2px solid #52688d;
+    border-radius: 8px;
+    background: rgba(17, 24, 43, 0.94);
+    box-shadow: 0 16px 44px rgba(0, 0, 0, 0.34);
+    pointer-events: auto;
+  }
+
+  .mobile-sheet > header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 42px;
+    padding: 7px 9px;
+    border-bottom: 1px solid #40567c;
+  }
+
+  .mobile-sheet > header strong {
+    color: #ffda6a;
+    font-size: 13px;
+    font-weight: 950;
+    text-transform: uppercase;
+  }
+
+  .mobile-sheet > header button {
+    min-height: 30px;
+    padding: 0 10px;
+    font-size: 11px;
+  }
+
+  .mobile-sheet-body {
+    min-height: 0;
+    display: grid;
+    gap: 8px;
+    padding: 9px;
+    overflow: hidden auto;
+  }
+
+  .mobile-sheet .skill-grid div {
+    min-height: 54px;
+  }
+
+  .mobile-sheet .task-list {
+    max-height: none;
+  }
+
+  .mobile-sheet .academy-card,
+  .mobile-sheet .npc-card {
+    margin-top: 0;
+  }
+
+  .mobile-sheet .room-grid,
+  .mobile-sheet .npc-list,
+  .mobile-sheet .inventory-bar,
+  .mobile-craft-list {
+    display: grid;
+    gap: 6px;
+  }
+
+  .mobile-sheet .room-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .mobile-sheet .npc-list,
+  .mobile-craft-list {
+    grid-template-columns: 1fr;
+  }
+
+  .mobile-sheet .inventory-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mobile-sheet .room-grid button,
+  .mobile-sheet .npc-list button,
+  .mobile-craft-list button {
+    min-height: 38px;
+    padding: 6px 8px;
+  }
+
+  .mobile-craft-list button {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3px;
+    text-align: left;
+  }
+
+  .mobile-craft-list button:disabled {
+    cursor: not-allowed;
+    opacity: 0.48;
+  }
+
+  .mobile-sheet .chat-log {
+    height: auto;
+    min-height: 100px;
+    max-height: 178px;
+  }
+
+  .mobile-sheet .quick-chat,
+  .mobile-sheet .mobile-emotes {
+    display: flex;
+  }
+
+  .mobile-sheet .mobile-emotes button {
+    min-height: 34px;
+    padding: 0 10px;
+  }
+}
+
+@media (max-width: 560px) {
+  .login-screen {
+    padding: 14px;
+  }
+
+  .login-panel {
+    padding: 20px;
+  }
+
+  .login-panel h1 {
+    font-size: clamp(32px, 12vw, 48px);
+  }
+
+  .mobile-top-bar {
+    min-height: 42px;
+    padding: 6px 9px;
+  }
+
+  .mobile-sheet {
+    max-height: min(44vh, 300px);
+  }
+
+  .mobile-sheet .chat-log {
+    min-height: 86px;
+  }
+}
+
+@media (max-height: 520px) and (max-width: 900px) {
+  .mobile-top-bar {
+    min-height: 36px;
+    padding: 5px 8px;
+  }
+
+  .mobile-top-bar small {
+    display: none;
+  }
+
+  .mobile-controls {
+    bottom: calc(58px + env(safe-area-inset-bottom));
+  }
+
+  .mobile-controls button {
+    min-height: 50px;
+  }
+
+  .mobile-tab-dock button {
+    min-height: 36px;
+  }
+
+  .mobile-sheet {
+    bottom: calc(116px + env(safe-area-inset-bottom));
+    max-height: min(38vh, 180px);
+  }
+
+  .mobile-sheet-body {
+    gap: 6px;
+    padding: 7px;
+  }
+
+  .mobile-sheet .academy-card,
+  .mobile-sheet .npc-card {
+    display: none;
+  }
+
+  .mobile-sheet .chat-log {
+    min-height: 66px;
+    max-height: 86px;
   }
 }
