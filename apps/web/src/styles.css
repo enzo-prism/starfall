@@ -1,0 +1,665 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #f7fbff;
+  background: #11182b;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.login-screen {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    linear-gradient(180deg, rgba(17, 24, 43, 0.18), #11182b 68%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 18px),
+    radial-gradient(circle at 20% 20%, #314f77, transparent 28%),
+    #11182b;
+}
+
+.login-panel {
+  width: min(540px, 100%);
+  padding: 28px;
+  border: 2px solid #5b7197;
+  border-radius: 8px;
+  background: rgba(20, 30, 55, 0.94);
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.38);
+}
+
+.brand-mark {
+  display: inline-grid;
+  place-items: center;
+  min-height: 32px;
+  padding: 0 10px;
+  margin-bottom: 16px;
+  color: #11182b;
+  background: #ffda6a;
+  border: 2px solid #fff1a6;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.login-panel h1 {
+  margin: 0;
+  font-size: clamp(36px, 8vw, 70px);
+  line-height: 0.9;
+}
+
+.login-panel p {
+  max-width: 44ch;
+  color: #bfd1e7;
+  line-height: 1.6;
+}
+
+.login-panel label {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0;
+  color: #eaf4ff;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.login-panel input,
+.chat-form input {
+  min-height: 42px;
+  border: 2px solid #61769b;
+  border-radius: 6px;
+  padding: 0 12px;
+  color: #f7fbff;
+  background: #17223d;
+  outline: none;
+}
+
+.login-panel input:focus,
+.chat-form input:focus {
+  border-color: #ffda6a;
+}
+
+.avatar-picker,
+.quick-chat,
+.emotes,
+.tool-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.avatar-picker button,
+.primary-action,
+.quick-chat button,
+.emotes button,
+.tool-toggle button,
+.inventory-bar button,
+.craft-list button,
+.player-list button,
+.chat-form button,
+.mobile-controls button {
+  border: 2px solid #60749b;
+  border-radius: 6px;
+  color: #f7fbff;
+  background: #1a2949;
+}
+
+.avatar-picker button,
+.quick-chat button,
+.emotes button,
+.tool-toggle button,
+.chat-form button {
+  min-height: 34px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.avatar-picker button.selected,
+.tool-toggle button.selected,
+.inventory-bar button.selected {
+  color: #11182b;
+  border-color: #fff1a6;
+  background: #ffda6a;
+}
+
+.primary-action {
+  width: 100%;
+  min-height: 48px;
+  margin: 18px 0 10px;
+  color: #11182b;
+  border-color: #fff1a6;
+  background: #ffda6a;
+  font-weight: 900;
+}
+
+.status-line {
+  min-height: 22px;
+  color: #a9bfd8;
+  font-size: 13px;
+}
+
+.app-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #11182b;
+}
+
+.game-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.game-canvas canvas {
+  display: block;
+}
+
+.top-hud,
+.left-hud,
+.right-hud,
+.bottom-hud,
+.chat-panel,
+.mobile-controls {
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.top-hud > *,
+.left-hud *,
+.right-hud *,
+.bottom-hud *,
+.chat-panel *,
+.mobile-controls * {
+  pointer-events: auto;
+}
+
+.top-hud {
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.top-hud > div:first-child {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 2px solid #52688d;
+  border-radius: 8px;
+  background: rgba(17, 24, 43, 0.82);
+}
+
+.top-hud strong {
+  color: #ffda6a;
+  font-weight: 950;
+}
+
+.top-hud span,
+.status-pill {
+  color: #cfe0f4;
+  font-size: 13px;
+}
+
+.status-pill {
+  max-width: 360px;
+  min-height: 36px;
+  display: grid;
+  place-items: center;
+  padding: 0 12px;
+  border: 2px solid #3c785f;
+  border-radius: 8px;
+  background: rgba(22, 55, 49, 0.84);
+}
+
+.left-hud {
+  top: 66px;
+  left: 12px;
+  width: min(300px, calc(100% - 24px));
+  display: grid;
+  gap: 10px;
+}
+
+.right-hud {
+  top: 66px;
+  right: 12px;
+  width: 270px;
+  display: grid;
+  gap: 10px;
+  max-height: calc(100% - 156px);
+  overflow: hidden auto;
+}
+
+.hud-panel {
+  border: 2px solid #52688d;
+  border-radius: 8px;
+  background: rgba(17, 24, 43, 0.86);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.22);
+}
+
+.player-panel,
+.hud-panel {
+  padding: 10px;
+}
+
+.panel-title {
+  margin-bottom: 8px;
+  color: #ffda6a;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.skill-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.skill-grid div {
+  min-height: 66px;
+  display: grid;
+  gap: 3px;
+  align-content: center;
+  padding: 8px;
+  border: 1px solid #40567c;
+  border-radius: 6px;
+  background: #16233e;
+}
+
+.skill-grid span,
+.task small,
+.craft-list small,
+.player-list small {
+  color: #a9bfd8;
+  font-size: 11px;
+}
+
+.skill-grid strong {
+  color: #f7fbff;
+  font-size: 16px;
+}
+
+.task-list,
+.player-list,
+.craft-list,
+.npc-list {
+  display: grid;
+  gap: 6px;
+}
+
+.task-list {
+  max-height: 254px;
+  overflow: hidden auto;
+}
+
+.task {
+  min-height: 34px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid #40567c;
+  border-radius: 6px;
+  background: #16233e;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.task.done {
+  border-color: #68ba7f;
+  background: #173731;
+}
+
+.player-list button,
+.craft-list button,
+.inventory-bar button,
+.npc-list button {
+  min-height: 42px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 9px;
+  text-align: left;
+}
+
+.craft-list button {
+  grid-template-columns: 1fr;
+}
+
+.room-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.room-grid button {
+  min-height: 32px;
+  padding: 5px 7px;
+  border: 1px solid #40567c;
+  border-radius: 6px;
+  color: #eaf4ff;
+  background: #16233e;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.room-grid button.selected,
+.npc-list button.selected {
+  border-color: #fff1a6;
+  color: #11182b;
+  background: #ffda6a;
+}
+
+.academy-card,
+.npc-card {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px solid #40567c;
+  border-radius: 6px;
+  background: #16233e;
+}
+
+.academy-card strong,
+.npc-card strong {
+  color: #f7fbff;
+  font-size: 13px;
+}
+
+.academy-card span,
+.npc-card span {
+  color: #d6e7fa;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.npc-card small,
+.academy-card small {
+  color: #a9bfd8;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.academy-card button,
+.npc-card button {
+  min-height: 32px;
+  border: 1px solid #477869;
+  border-radius: 6px;
+  color: #dff7ed;
+  background: #163731;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.npc-list {
+  margin-top: 8px;
+}
+
+.craft-list button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.chat-panel {
+  left: 324px;
+  bottom: 96px;
+  width: min(430px, calc(100% - 24px));
+  padding: 10px;
+}
+
+.chat-log {
+  height: 54px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 5px;
+  font-size: 13px;
+}
+
+.chat-log div {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 7px;
+}
+
+.chat-log strong {
+  color: #ffda6a;
+}
+
+.chat-log span {
+  color: #eaf4ff;
+}
+
+.chat-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.quick-chat button {
+  color: #dff7ed;
+  border-color: #477869;
+  background: #163731;
+}
+
+.bottom-hud {
+  left: 50%;
+  bottom: 12px;
+  width: min(920px, calc(100% - 24px));
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: end;
+  transform: translateX(-50%);
+}
+
+.inventory-bar {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(76px, 1fr));
+  gap: 8px;
+}
+
+.inventory-bar button {
+  min-height: 54px;
+  font-size: 12px;
+}
+
+.inventory-bar span {
+  overflow-wrap: anywhere;
+}
+
+.inventory-bar strong {
+  font-size: 16px;
+}
+
+.mobile-controls {
+  display: none;
+  right: 12px;
+  bottom: 190px;
+  gap: 8px;
+}
+
+.mobile-controls button {
+  min-width: 58px;
+  min-height: 46px;
+  font-size: 12px;
+  font-weight: 900;
+  touch-action: none;
+}
+
+@media (max-width: 860px) {
+  .right-hud {
+    top: auto;
+    right: 8px;
+    bottom: 370px;
+    left: 8px;
+    width: auto;
+    max-height: 96px;
+    overflow: hidden auto;
+  }
+
+  .right-hud > .hud-panel:not(.academy-panel) {
+    display: none;
+  }
+
+  .academy-panel .academy-card,
+  .academy-panel .npc-card {
+    display: none;
+  }
+
+  .academy-panel {
+    padding: 8px;
+  }
+
+  .academy-panel .npc-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .academy-panel .npc-list button {
+    min-height: 34px;
+    grid-template-columns: 1fr;
+  }
+
+  .academy-panel .npc-list small {
+    display: none;
+  }
+
+  .left-hud {
+    top: 58px;
+    width: min(360px, calc(100% - 24px));
+  }
+
+  .skill-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .skill-grid div {
+    min-height: 58px;
+    padding: 6px;
+  }
+
+  .bottom-hud {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-bar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .emotes {
+    display: none;
+  }
+
+  .chat-panel {
+    left: 12px;
+    bottom: 210px;
+  }
+
+  .mobile-controls {
+    display: flex;
+    bottom: 118px;
+  }
+}
+
+@media (max-width: 560px) {
+  .top-hud {
+    align-items: stretch;
+  }
+
+  .status-pill {
+    display: none;
+  }
+
+  .left-hud {
+    top: 62px;
+    width: calc(100% - 24px);
+  }
+
+  .task-list .task:nth-child(n + 4) {
+    display: none;
+  }
+
+  .chat-panel {
+    left: 8px;
+    right: 8px;
+    bottom: 202px;
+    width: auto;
+  }
+
+  .right-hud {
+    bottom: 382px;
+    max-height: 110px;
+    overflow: hidden;
+  }
+
+  .academy-panel {
+    padding: 7px;
+  }
+
+  .academy-panel .panel-title {
+    margin-bottom: 6px;
+  }
+
+  .room-grid,
+  .academy-panel .npc-list {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 1px;
+  }
+
+  .room-grid button,
+  .academy-panel .npc-list button {
+    flex: 0 0 108px;
+    min-height: 30px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .academy-panel .npc-list {
+    margin-top: 5px;
+  }
+
+  .chat-log {
+    height: 94px;
+  }
+
+  .quick-chat {
+    display: none;
+  }
+}

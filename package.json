@@ -1,0 +1,24 @@
+{
+  "name": "starfall",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Starfall is a local-first browser MMO sandbox with pixel exploration, cozy social play, and classless progression.",
+  "type": "module",
+  "packageManager": "pnpm@10.12.4",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @starfall/server --filter @starfall/web dev",
+    "dev:server": "pnpm --filter @starfall/server dev",
+    "dev:web": "pnpm --filter @starfall/web dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.14"
+  }
+}
